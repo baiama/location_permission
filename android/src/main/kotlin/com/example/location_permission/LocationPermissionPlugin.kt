@@ -91,15 +91,17 @@ class LocationPermissionPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry
         } else {
           result.success("denied")
         }
+        return  true
       }
     }
-    return true
+    return false
   }
 
 
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     this.activity = binding.activity
+    binding.addRequestPermissionsResultListener(this)
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -108,6 +110,7 @@ class LocationPermissionPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
     this.activity = binding.activity
+    binding.addRequestPermissionsResultListener(this)
   }
 
   override fun onDetachedFromActivity() {
