@@ -21,31 +21,17 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }else if(currentStatus == .authorizedWhenInUse){
             self.locationManager.requestAlwaysAuthorization()
         }else {
-            completion("denied")
+            let statusStr = self.convertLocationStatus(status: currentStatus)
+            completion(statusStr)
             return
         }
-        
 
         self.requestLocationAuthorizationCallback = { status in
-            switch status {
-            case .notDetermined:
-                completion("not_determined")
-                break
-            case .restricted:
-                completion("not_determined")
-                break
-            case .denied:
-                completion("denied")
-                break
-            case .authorizedAlways:
-                completion("always")
-                break
-            case .authorizedWhenInUse:
-                completion("authorized_when_in_use")
-                break
-             default:
-                completion("error")
+            if(status == .authorizedWhenInUse){
+                self.locationManager.requestAlwaysAuthorization()
             }
+            let statusStr = self.convertLocationStatus(status: status)
+            completion(statusStr)
         }
         
     }
@@ -54,26 +40,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         
         let currentStatus = CLLocationManager.authorizationStatus()
         
-        switch currentStatus {
-        case .notDetermined:
-            completion("not_determined")
-            break
-        case .restricted:
-            completion("denied")
-            break
-        case .denied:
-            completion("denied")
-            break
-        case .authorizedAlways:
-            completion("always")
-            break
-        case .authorizedWhenInUse:
-            completion("authorized_when_in_use")
-            break
-         default:
-            completion("error")
-        }
-
+        let statusStr = convertLocationStatus(status: currentStatus)
+        completion(statusStr)
     }
     
     public func openSettings(){
@@ -90,5 +58,22 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager,
                                 didChangeAuthorization status: CLAuthorizationStatus) {
         self.requestLocationAuthorizationCallback?(status)
+    }
+    
+    private func convertLocationStatus(status : CLAuthorizationStatus) -> String{
+        switch status {
+        case .notDetermined:
+            return "not_determined"
+        case .restricted:
+            return "denied"
+        case .denied:
+            return "denied"
+        case .authorizedAlways:
+            return "always"
+        case .authorizedWhenInUse:
+            return "authorized_when_in_use"
+         default:
+            return "error"
+        }
     }
 }
