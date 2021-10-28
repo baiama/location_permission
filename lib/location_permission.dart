@@ -5,13 +5,13 @@ import 'package:flutter/services.dart';
 class LocationPermission {
   static const MethodChannel _channel = MethodChannel('location_permission');
 
-  static Future<LocationPermissionStatus> requestLocationPermission() async {
-    String currentStatus = await _getLocationStatus();
-    if (currentStatus == "not_determined" ||
-        currentStatus == "authorized_when_in_use") {
-      return await _requestPermission();
-    }
-    return _convertStatus(currentStatus);
+  static Future<String> requestLocationPermission() async {
+    String status = await _channel.invokeMethod('request_permission');
+    return status;
+    // if (currentStatus == "not_determined") {
+    //   return await _requestPermission();
+    // }
+    // return _convertStatus(currentStatus);
   }
 
   static void openSettings() {

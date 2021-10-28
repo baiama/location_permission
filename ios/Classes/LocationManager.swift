@@ -16,22 +16,25 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     public func requestLocationAuthorization(completion: @escaping (String)->()){
         self.locationManager.delegate = self
         let currentStatus = CLLocationManager.authorizationStatus()
+        var alwaysUserRequested = false
+      
         if(currentStatus == .notDetermined){
-            self.locationManager.requestWhenInUseAuthorization()
-        }else if(currentStatus == .authorizedWhenInUse){
-            self.locationManager.requestAlwaysAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         }else {
             let statusStr = self.convertLocationStatus(status: currentStatus)
             completion(statusStr)
-            return
         }
-
-        self.requestLocationAuthorizationCallback = { status in
+        
+        requestLocationAuthorizationCallback = { status in
             if(status == .authorizedWhenInUse){
+                if(alwaysUserRequested){
+                    completion(self.convertLocationStatus(status: status))
+                }
                 self.locationManager.requestAlwaysAuthorization()
+                alwaysUserRequested = true
+            }else {
+                completion(self.convertLocationStatus(status: status))
             }
-            let statusStr = self.convertLocationStatus(status: status)
-            completion(statusStr)
         }
         
     }
@@ -60,12 +63,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         self.requestLocationAuthorizationCallback?(status)
     }
     
-    private func convertLocationStatus(status : CLAuthorizationStatus) -> String{
+    private func convertLocationStatus(status : CLAuthorizationStatus) -> String {
         switch status {
         case .notDetermined:
             return "not_determined"
         case .restricted:
-            return "denied"
+            return "restricted"
         case .denied:
             return "denied"
         case .authorizedAlways:
