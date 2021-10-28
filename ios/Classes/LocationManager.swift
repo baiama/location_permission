@@ -27,16 +27,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         
 
         self.requestLocationAuthorizationCallback = { status in
-//            if status == .authorizedWhenInUse {
-//                self.locationManager.requestAlwaysAuthorization()
-//            }else if(status == .authorizedAlways){
-//                completion("always")
-//            }else if(status == .denied){
-//                completion("denied")
-//            }else {
-//                completion("not_always")
-//            }
-            
             switch status {
             case .notDetermined:
                 completion("not_determined")
@@ -51,7 +41,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 completion("always")
                 break
             case .authorizedWhenInUse:
-                self.locationManager.requestAlwaysAuthorization()
+                completion("authorized_when_in_use")
                 break
              default:
                 completion("error")
@@ -83,30 +73,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
          default:
             completion("error")
         }
-        
-//        if currentStatus == .notDetermined {
-//            completion("not_determined")
-//        }
-//
-//        if currentStatus == .restricted {
-//            completion("restricted")
-//            return
-//        }
-//
-//        if currentStatus == .denied {
-//            completion("denied")
-//            return
-//        }
-//
-//        if currentStatus == .authorizedAlways {
-//            completion("always")
-//            return
-//        }
-//
-//        if(currentStatus == .authorizedWhenInUse){
-//            completion("authorized_when_in_use")
-//            return
-//        }
+
     }
     
     public func openSettings(){
@@ -115,9 +82,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
 
         if UIApplication.shared.canOpenURL(settingsUrl) {
-            UIApplication.shared.open(settingsUrl, completionHandler: { (success) in
-                print("Settings opened: \(success)") // Prints true
-            })
+            UIApplication.shared.open(settingsUrl, completionHandler: nil)
         }
     }
     

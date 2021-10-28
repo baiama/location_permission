@@ -21,7 +21,7 @@ public class SwiftLocationPermissionPlugin: NSObject, FlutterPlugin {
 //      }
       switch call.method {
       case "request_permission":
-          LocationManager.shared.requestLocationAuthorization(completion: { status in
+          LocationManager.shared.requestLocationWhileUse(completion: { status in
               result(status)
           })
           break
