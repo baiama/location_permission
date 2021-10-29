@@ -14,46 +14,44 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private var requestLocationAuthorizationCallback: ((CLAuthorizationStatus) -> Void)?
 
     public func requestLocationAuthorization(completion: @escaping (String)->()){
-        self.locationManager.delegate = self
-        let currentStatus = CLLocationManager.authorizationStatus()
-        
-        if currentStatus == .restricted {
-            completion("not_always")
-            return
-        }
-        
-        if currentStatus == .denied {
+        if(!CLLocationManager.locationServicesEnabled()) {
             completion("denied")
             return
         }
+               
+        let currentStatus = getAuthorizationStatus()
         
-        if currentStatus == .authorizedAlways {
-            completion("always")
-            return
+        if(currentStatus == .notDetermined){
+            self.locationManager.delegate = self
+            locationManager.requestWhenInUseAuthorization()
+        }else if(currentStatus == .authorizedWhenInUse){
+            self.locationManager.delegate = self
+            locationManager.requestAlwaysAuthorization()
+        }else {
+            let statusStr = self.convertLocationStatus(status: currentStatus)
+            completion(statusStr)
         }
         
-        if(currentStatus == .authorizedWhenInUse){
-            completion("authorized_when_in_use")
-            return
-        }
-        
-        if currentStatus == .notDetermined {
-            self.locationManager.requestWhenInUseAuthorization()
-        }
-
-        self.requestLocationAuthorizationCallback = { status in
-            if status == .authorizedWhenInUse {
+        requestLocationAuthorizationCallback = { status in
+            if(status == .authorizedWhenInUse){
+                self.locationManager.delegate = self
                 self.locationManager.requestAlwaysAuthorization()
-            }else if(status == .authorizedAlways){
-                completion("always")
-            }else if(status == .denied){
-                completion("denied")
             }else {
-                completion("not_always")
+                completion(self.convertLocationStatus(status: status))
             }
-            
         }
         
+    }
+    
+    public func getLocationStatus(completion: @escaping (String)->()){
+        if(!CLLocationManager.locationServicesEnabled()) {
+            completion("denied")
+            return
+        }
+        let currentStatus = getAuthorizationStatus()
+        
+        let statusStr = convertLocationStatus(status: currentStatus)
+        completion(statusStr)
     }
     
     public func openSettings(){
@@ -62,9 +60,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
 
         if UIApplication.shared.canOpenURL(settingsUrl) {
-            UIApplication.shared.open(settingsUrl, completionHandler: { (success) in
-                print("Settings opened: \(success)") // Prints true
-            })
+            UIApplication.shared.open(settingsUrl, completionHandler: nil)
         }
     }
     
@@ -72,5 +68,35 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager,
                                 didChangeAuthorization status: CLAuthorizationStatus) {
         self.requestLocationAuthorizationCallback?(status)
+    }
+    
+    private func getAuthorizationStatus () -> CLAuthorizationStatus {
+        let authorizationStatus: CLAuthorizationStatus = {
+            let locationManager = CLLocationManager()
+            if #available(iOS 14.0, tvOS 14.0, *) {
+                return locationManager.authorizationStatus
+            } else {
+                return CLLocationManager.authorizationStatus()
+            }
+        }()
+        
+        return authorizationStatus
+    }
+    
+    private func convertLocationStatus(status : CLAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined:
+            return "not_determined"
+        case .restricted:
+            return "restricted"
+        case .denied:
+            return "denied"
+        case .authorizedAlways:
+            return "always"
+        case .authorizedWhenInUse:
+            return "authorized_when_in_use"
+         default:
+            return "error"
+        }
     }
 }

@@ -91,10 +91,9 @@ class LocationPermissionPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry
         } else {
           result.success("denied")
         }
-        return  true
       }
     }
-    return false
+    return  true
   }
 
 
