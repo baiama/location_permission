@@ -33,7 +33,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
         
         requestLocationAuthorizationCallback = { status in
-            completion(self.convertLocationStatus(status: status))
+            if(status == .authorizedWhenInUse){
+                self.locationManager.delegate = self
+                self.locationManager.requestAlwaysAuthorization()
+            }else {
+                completion(self.convertLocationStatus(status: status))
+            }
         }
         
     }
