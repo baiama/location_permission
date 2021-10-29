@@ -23,7 +23,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         
         if(currentStatus == .notDetermined){
             self.locationManager.delegate = self
-            locationManager.requestAlwaysAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         }else if(currentStatus == .authorizedWhenInUse){
             self.locationManager.delegate = self
             locationManager.requestAlwaysAuthorization()
