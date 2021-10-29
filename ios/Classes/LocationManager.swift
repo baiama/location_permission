@@ -18,26 +18,22 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             completion("denied")
             return
         }
-        
-        
+               
         let currentStatus = getAuthorizationStatus()
         
-      
         if(currentStatus == .notDetermined){
-            locationManager.requestWhenInUseAuthorization()
+            self.locationManager.delegate = self
+            locationManager.requestAlwaysAuthorization()
+        }else if(currentStatus == .authorizedWhenInUse){
+            self.locationManager.delegate = self
+            locationManager.requestAlwaysAuthorization()
         }else {
             let statusStr = self.convertLocationStatus(status: currentStatus)
             completion(statusStr)
         }
         
         requestLocationAuthorizationCallback = { status in
-            if(status == .authorizedWhenInUse){
-                completion(self.convertLocationStatus(status: status))
-                self.locationManager.requestAlwaysAuthorization()
-                
-            }else {
-                completion(self.convertLocationStatus(status: status))
-            }
+            completion(self.convertLocationStatus(status: status))
         }
         
     }
