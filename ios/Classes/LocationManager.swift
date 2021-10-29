@@ -14,9 +14,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private var requestLocationAuthorizationCallback: ((CLAuthorizationStatus) -> Void)?
 
     public func requestLocationAuthorization(completion: @escaping (String)->()){
-        self.locationManager.delegate = self
-        let currentStatus = CLLocationManager.authorizationStatus()
-        var alwaysUserRequested = false
+        if(!CLLocationManager.locationServicesEnabled()) {
+            completion("denied")
+            return
+        }
+        
+        
+        let currentStatus = getAuthorizationStatus()
+        
       
         if(currentStatus == .notDetermined){
             locationManager.requestWhenInUseAuthorization()
@@ -27,11 +32,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         
         requestLocationAuthorizationCallback = { status in
             if(status == .authorizedWhenInUse){
-                if(alwaysUserRequested){
-                    completion(self.convertLocationStatus(status: status))
-                }
+                completion(self.convertLocationStatus(status: status))
                 self.locationManager.requestAlwaysAuthorization()
-                alwaysUserRequested = true
+                
             }else {
                 completion(self.convertLocationStatus(status: status))
             }
@@ -40,8 +43,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
     
     public func getLocationStatus(completion: @escaping (String)->()){
-        
-        let currentStatus = CLLocationManager.authorizationStatus()
+        if(!CLLocationManager.locationServicesEnabled()) {
+            completion("denied")
+            return
+        }
+        let currentStatus = getAuthorizationStatus()
         
         let statusStr = convertLocationStatus(status: currentStatus)
         completion(statusStr)
@@ -61,6 +67,19 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager,
                                 didChangeAuthorization status: CLAuthorizationStatus) {
         self.requestLocationAuthorizationCallback?(status)
+    }
+    
+    private func getAuthorizationStatus () -> CLAuthorizationStatus {
+        let authorizationStatus: CLAuthorizationStatus = {
+            let locationManager = CLLocationManager()
+            if #available(iOS 14.0, tvOS 14.0, *) {
+                return locationManager.authorizationStatus
+            } else {
+                return CLLocationManager.authorizationStatus()
+            }
+        }()
+        
+        return authorizationStatus
     }
     
     private func convertLocationStatus(status : CLAuthorizationStatus) -> String {
