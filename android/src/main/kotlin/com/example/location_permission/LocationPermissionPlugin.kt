@@ -34,6 +34,10 @@ class LocationPermissionPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     when (call.method) {
+      "get_location_status" -> {
+        this.result = result
+        requestPermission()
+      }
       "request_permission" -> {
         this.result = result
         requestPermission()
